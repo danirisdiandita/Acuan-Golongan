@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Golongan {
+  GOL_I    @map("Golongan I")
+  GOL_II   @map("Golongan II")
+  GOL_III  @map("Golongan III")
+  GOL_IVA  @map("Golongan IVa")
+  GOL_VA   @map("Golongan Va")
+  GOL_VIA  @map("Golongan VIa")
+  GOL_VII  @map("Golongan VII")
+  GOL_VIII @map("Golongan VIII")
+  GOL_IX   @map("Golongan IX")
+}
+
+model VehicleClass {
+  id           String   @id @default(uuid())
+  imageKeyPath String   @map("image_key_path")
+  class        Golongan
+
+  @@map("vehicle_class")
+}
