@@ -4,7 +4,7 @@ import { prisma } from "./prisma";
 import { Golongan } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-import { getPresignedDownloadUrl, uploadFileToS3, deleteFromS3 } from "./s3";
+import { getPresignedDownloadUrl, uploadFileToS3, deleteFromS3, getPresignedUploadUrl } from "./s3";
 
 export async function getVehicles() {
   const vehicles = await prisma.vehicleClass.findMany();
@@ -24,6 +24,20 @@ export async function updateVehicleClass(id: string, newClass: Golongan) {
   await prisma.vehicleClass.update({
     where: { id },
     data: { class: newClass },
+  });
+  revalidatePath("/");
+}
+
+export async function getUploadUrl(filename: string, fileType: string) {
+  return await getPresignedUploadUrl(filename, fileType);
+}
+
+export async function finalizeVehicleUpload(key: string, golongan: Golongan) {
+  await prisma.vehicleClass.create({
+    data: {
+      imageKeyPath: key,
+      class: golongan,
+    },
   });
   revalidatePath("/");
 }
