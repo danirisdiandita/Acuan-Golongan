@@ -40,7 +40,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useVehicles, useUpdateVehicleClass, useUploadVehicle, useDeleteVehicle } from "@/hooks/use-vehicles";
 
 const GOLONGAN_ORDER: Golongan[] = [
-  "GOL_I", "GOL_II", "GOL_III", "GOL_IVA", "GOL_VA", "GOL_VB", "GOL_VIA", "GOL_VIB", "GOL_VII", "GOL_VIII", "GOL_IX"
+  "GOL_I", "GOL_II", "GOL_III", "GOL_IVA", "GOL_VA", "GOL_VB", "GOL_VIA", "GOL_VIB", "GOL_VII", "GOL_VIII", "GOL_IX", "UNKNOWN"
 ];
 
 const GOLONGAN_LABELS: Record<Golongan, string> = {
@@ -55,6 +55,7 @@ const GOLONGAN_LABELS: Record<Golongan, string> = {
   GOL_VII: "Golongan VII",
   GOL_VIII: "Golongan VIII",
   GOL_IX: "Golongan IX",
+  UNKNOWN: "Unknown",
 };
 
 function VehicleGalleryModal({
