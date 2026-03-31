@@ -40,7 +40,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useVehicles, useUpdateVehicleClass, useUploadVehicle, useDeleteVehicle, useBulkUploadVehicles } from "@/hooks/use-vehicles";
 
 const GOLONGAN_ORDER: Golongan[] = [
-  "GOL_I", "GOL_II", "GOL_III", "GOL_IVA", "GOL_VA", "GOL_VB", "GOL_VIA", "GOL_VIB", "GOL_VII", "GOL_VIII", "GOL_IX", "UNKNOWN"
+  "GOL_I", "GOL_II", "GOL_III", "GOL_IVA", "GOL_IVB", "GOL_VA", "GOL_VB", "GOL_VIA", "GOL_VIB", "GOL_VII", "GOL_VIII", "GOL_IX", "UNKNOWN"
 ];
 
 const GOLONGAN_LABELS: Record<Golongan, string> = {
@@ -48,6 +48,7 @@ const GOLONGAN_LABELS: Record<Golongan, string> = {
   GOL_II: "Golongan II",
   GOL_III: "Golongan III",
   GOL_IVA: "Golongan IVa",
+  GOL_IVB: "Golongan IVb",
   GOL_VA: "Golongan Va",
   GOL_VB: "Golongan Vb",
   GOL_VIA: "Golongan VIa",
@@ -318,7 +319,10 @@ function SortableItem({
             value={currentClass}
             onValueChange={(val) => onUpdate(id, val as Golongan)}
           >
-            <SelectTrigger className="h-full border-0 rounded-none shadow-none focus:ring-0 text-slate-600 font-medium text-xs hover:bg-slate-50 transition-colors">
+            <SelectTrigger 
+              className="h-full border-0 rounded-none shadow-none focus:ring-0 text-slate-600 font-medium text-xs hover:bg-slate-50 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -332,6 +336,7 @@ function SortableItem({
           {...attributes}
           {...listeners}
           className="cursor-grab active:cursor-grabbing p-3 text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+          onClick={(e) => e.stopPropagation()}
         >
           <GripVertical className="h-4 w-4" />
         </div>
@@ -364,57 +369,72 @@ function DroppableContainer({
   });
 
   return (
-    <Card className="flex flex-col h-full bg-slate-50/30 border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl group/container">
-      <CardHeader className="flex flex-row items-center justify-between py-4 px-5 space-y-0">
+    <Card className="flex flex-col h-full bg-slate-50/30 border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 rounded-3xl group/container overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between py-4 px-6 space-y-0 bg-white/50 border-b border-slate-100/50">
         <div className="flex items-center gap-3">
-          <div className="h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
-          <CardTitle className="text-xs font-bold text-slate-700 tracking-tight">{GOLONGAN_LABELS[golongan]}</CardTitle>
-          <div className="flex gap-1 opacity-0 group-hover/container:opacity-100 transition-all translate-x-1 group-hover/container:translate-x-0">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() => onOpenGallery(golongan)}
-              className="h-6 w-6 rounded-lg bg-white shadow-sm border-slate-200 hover:bg-indigo-50 hover:text-indigo-600"
-            >
-              <Maximize2 className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onHide(golongan)}
-              className="h-6 w-6 rounded-lg text-slate-400 hover:text-red-500"
-            >
-              <EyeOff className="h-3 w-3" />
-            </Button>
-          </div>
+          <div className="h-2.5 w-2.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.6)]" />
+          <CardTitle className="text-[11px] font-black text-slate-800 tracking-wider uppercase">{GOLONGAN_LABELS[golongan]}</CardTitle>
         </div>
-        <Badge variant="secondary" className="h-6 px-2.5 bg-slate-200/50 text-slate-600 font-bold text-[9px] border-white shadow-inner">
-          {items.length}
+        <Badge variant="secondary" className="h-6 px-3 bg-indigo-50 text-indigo-700 font-bold text-[10px] border-indigo-100 shadow-sm rounded-full">
+          {items.length} Units
         </Badge>
       </CardHeader>
       <CardContent
         ref={setNodeRef}
-        className="flex-1 flex flex-col gap-4 p-4 min-h-[300px]"
+        className="flex-1 p-4 relative group/content cursor-pointer"
+        onClick={() => onOpenGallery(golongan)}
       >
-        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={items.slice(0, 1).map(i => i.id)} strategy={verticalListSortingStrategy}>
           {items.length === 0 ? (
-            <div className="flex w-full items-center justify-center text-[10px] font-bold uppercase opacity-50 italic">
-              Drag vehicles here
+            <div className="flex flex-col w-full h-48 items-center justify-center text-[10px] font-bold uppercase text-slate-300 border-2 border-dashed border-slate-100 rounded-2xl gap-3">
+              <div className="bg-slate-50 p-3 rounded-full">
+                <Maximize2 className="h-4 w-4 opacity-20" />
+              </div>
+              Drop assets here
             </div>
           ) : (
-            items.map((item) => (
+            <div className="relative">
               <SortableItem
-                key={item.id}
-                id={item.id}
-                imageKey={item.imageKeyPath}
-                currentClass={item.class}
-                imageUrl={(item as any).imageUrl}
+                key={items[0].id}
+                id={items[0].id}
+                imageKey={items[0].imageKeyPath}
+                currentClass={items[0].class}
+                imageUrl={(items[0] as any).imageUrl}
                 onDelete={onDelete}
                 onUpdate={onUpdate}
               />
-            ))
+              
+              {items.length > 1 && (
+                <div className="absolute inset-0 bg-indigo-900/60 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover/content:opacity-100 transition-all duration-300 transform scale-95 group-hover/content:scale-100">
+                  <div className="bg-white/20 p-2 rounded-full mb-2">
+                    <Maximize2 className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="text-white font-black text-xs uppercase tracking-widest">+ {items.length - 1} More Assets</span>
+                  <p className="text-indigo-100 text-[9px] font-medium mt-1">Click to view all cataloged units</p>
+                </div>
+              )}
+              
+              {/* Tooltip-like badge if multiple items but not hovering */}
+              {items.length > 1 && (
+                <div className="absolute -bottom-2 -right-1 bg-white border border-slate-100 shadow-lg px-2 py-1 rounded-lg text-[9px] font-black text-indigo-600 group-hover/content:opacity-0 transition-opacity">
+                  + {items.length - 1} MORE
+                </div>
+              )}
+            </div>
           )}
         </SortableContext>
+        
+        <div className="mt-4 opacity-0 group-hover/container:opacity-100 transition-opacity flex justify-center">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
+              onClick={(e) => { e.stopPropagation(); onHide(golongan); }}
+            >
+              <EyeOff className="h-3 w-3 mr-2" />
+              Hide Viewport
+            </Button>
+        </div>
       </CardContent>
     </Card>
   );
