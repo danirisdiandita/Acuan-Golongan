@@ -62,12 +62,14 @@ function VehicleGalleryModal({
   isOpen,
   onClose,
   items,
-  golonganTitle
+  golonganTitle,
+  onUpdate
 }: {
   isOpen: boolean;
   onClose: () => void;
   items: any[];
   golonganTitle: string;
+  onUpdate: (id: string, newClass: Golongan) => void;
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -98,10 +100,26 @@ function VehicleGalleryModal({
                       </div>
                     )}
                   </div>
-                  <div className="px-6 flex items-center justify-between">
+                  <div className="px-6 flex items-center justify-between gap-4">
                     <Badge variant="secondary" className="bg-white text-slate-500 font-medium px-4 py-1.5 rounded-full border shadow-sm uppercase tracking-wider text-[10px]">
                       Asset: {item.imageKeyPath}
                     </Badge>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Re-classify:</span>
+                      <Select
+                        value={item.class}
+                        onValueChange={(val) => onUpdate(item.id, val as Golongan)}
+                      >
+                        <SelectTrigger className="w-48 h-9 rounded-xl border-slate-200 bg-white shadow-sm font-semibold text-xs text-slate-600 focus:ring-indigo-500/20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {GOLONGAN_ORDER.map(g => (
+                            <SelectItem key={g} value={g} className="text-xs font-semibold">{GOLONGAN_LABELS[g]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -559,6 +577,7 @@ export default function Home() {
       onClose={() => setGalleryOpen(false)}
       golonganTitle={selectedGolongan ? GOLONGAN_LABELS[selectedGolongan] : ""}
       items={galleryItems}
+      onUpdate={handleUpdate}
     />
 
     <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
