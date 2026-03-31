@@ -23,6 +23,7 @@ enum Golongan {
   GOL_VII  @map("Golongan VII")
   GOL_VIII @map("Golongan VIII")
   GOL_IX   @map("Golongan IX")
+  UNKNOWN  @map("Unknown")
 }
 
 model VehicleClass {
