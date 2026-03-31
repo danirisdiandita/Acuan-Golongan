@@ -16,6 +16,7 @@ enum Golongan {
   GOL_II   @map("Golongan II")
   GOL_III  @map("Golongan III")
   GOL_IVA  @map("Golongan IVa")
+  GOL_IVB  @map("Golongan IVb")
   GOL_VA   @map("Golongan Va")
   GOL_VB   @map("Golongan Vb")
   GOL_VIA  @map("Golongan VIa")
