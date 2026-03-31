@@ -8,7 +8,7 @@ import { getPresignedDownloadUrl, uploadFileToS3, deleteFromS3, getPresignedUplo
 
 export async function getVehicles() {
   const vehicles = await prisma.vehicleClass.findMany();
-  
+
   // Add presigned URLs
   const vehiclesWithUrls = await Promise.all(
     vehicles.map(async (v: any) => ({
@@ -16,7 +16,7 @@ export async function getVehicles() {
       imageUrl: await getPresignedDownloadUrl(v.imageKeyPath),
     }))
   );
-  
+
   return vehiclesWithUrls;
 }
 
@@ -67,10 +67,19 @@ export async function deleteVehicle(id: string) {
   });
 
   if (vehicle) {
-    await deleteFromS3(vehicle.imageKeyPath);
-    await prisma.vehicleClass.delete({
-      where: { id },
-    });
+    try {
+      await deleteFromS3(vehicle.imageKeyPath);
+    } catch (error) {
+      console.error("Error deleting vehicle:", error);
+    }
+
+    try {
+      await prisma.vehicleClass.delete({
+        where: { id },
+      });
+    } catch (error) {
+      console.error("Error deleting vehicle:", error);
+    }
   }
 
   revalidatePath("/");
