@@ -33,7 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useVehicles, useUpdateVehicleClass, useUploadVehicle, useDeleteVehicle } from "@/hooks/use-vehicles";
 
 const GOLONGAN_ORDER: Golongan[] = [
-  "GOL_I", "GOL_II", "GOL_III", "GOL_IVA", "GOL_VA", "GOL_VIA", "GOL_VII", "GOL_VIII", "GOL_IX"
+  "GOL_I", "GOL_II", "GOL_III", "GOL_IVA", "GOL_VA", "GOL_VB", "GOL_VIA", "GOL_VIB", "GOL_VII", "GOL_VIII", "GOL_IX"
 ];
 
 const GOLONGAN_LABELS: Record<Golongan, string> = {
@@ -42,7 +42,9 @@ const GOLONGAN_LABELS: Record<Golongan, string> = {
   GOL_III: "Golongan III",
   GOL_IVA: "Golongan IVa",
   GOL_VA: "Golongan Va",
+  GOL_VB: "Golongan Vb",
   GOL_VIA: "Golongan VIa",
+  GOL_VIB: "Golongan VIb",
   GOL_VII: "Golongan VII",
   GOL_VIII: "Golongan VIII",
   GOL_IX: "Golongan IX",
