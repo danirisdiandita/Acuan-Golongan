@@ -55,6 +55,36 @@ export function useUploadVehicle() {
   });
 }
 
+export function useBulkUploadVehicles() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (files: File[]) => {
+      const results = await Promise.all(
+        files.map(async (file) => {
+          // 1. Get presigned URL securely from server
+          const { url, key } = await getUploadUrl(file.name, file.type);
+
+          // 2. Direct browser upload to S3
+          const response = await fetch(url, {
+            method: "PUT",
+            body: file,
+            headers: { "Content-Type": file.type },
+          });
+
+          if (!response.ok) throw new Error(`Failed to upload ${file.name} to storage provider`);
+
+          // 3. Inform server to finalize record in DB with UNKNOWN class
+          return finalizeVehicleUpload(key, "UNKNOWN");
+        })
+      );
+      return results;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+    },
+  });
+}
+
 export function useDeleteVehicle() {
   const queryClient = useQueryClient();
   return useMutation({
