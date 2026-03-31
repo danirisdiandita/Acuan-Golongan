@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { useVehicles, useUpdateVehicleClass, useUploadVehicle, useDeleteVehicle } from "@/hooks/use-vehicles";
+import { useVehicles, useUpdateVehicleClass, useUploadVehicle, useDeleteVehicle, useBulkUploadVehicles } from "@/hooks/use-vehicles";
 
 const GOLONGAN_ORDER: Golongan[] = [
   "GOL_I", "GOL_II", "GOL_III", "GOL_IVA", "GOL_VA", "GOL_VB", "GOL_VIA", "GOL_VIB", "GOL_VII", "GOL_VIII", "GOL_IX", "UNKNOWN"
@@ -145,31 +145,32 @@ function UploadVehicleForm() {
   }
 
   return (
-    <Card className="mb-12 bg-white/50 border-dashed">
+    <Card className="bg-white shadow-sm border-slate-200">
       <CardHeader>
-        <CardTitle className="text-sm">Upload New Vehicle</CardTitle>
-        <CardDescription>Add a new vehicle image to the classification system.</CardDescription>
+        <CardTitle className="text-sm font-bold">Single Upload</CardTitle>
+        <CardDescription className="text-[11px]">Add a specific vehicle with its category.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 sm:flex-row sm:items-end">
-          <div className="flex-1 space-y-2">
-            <Label>Select Image</Label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Image Asset</Label>
             <Input
               type="file"
               name="file"
               required
               accept="image/*"
+              className="h-9 text-xs"
             />
           </div>
-          <div className="w-full sm:w-64 space-y-2">
-            <Label>Golongan</Label>
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Target Category</Label>
             <Select name="golongan" defaultValue={GOLONGAN_ORDER[0]}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9 text-xs">
                 <SelectValue placeholder="Select Golongan" />
               </SelectTrigger>
               <SelectContent>
                 {GOLONGAN_ORDER.map(g => (
-                  <SelectItem key={g} value={g}>{GOLONGAN_LABELS[g]}</SelectItem>
+                  <SelectItem key={g} value={g} className="text-xs">{GOLONGAN_LABELS[g]}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -177,10 +178,69 @@ function UploadVehicleForm() {
           <Button
             type="submit"
             disabled={uploadMutation.isPending}
-            className="w-full sm:w-auto"
+            className="w-full h-9 text-xs font-bold"
           >
-            {uploadMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Upload Vehicle
+            {uploadMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Upload className="h-3 w-3 mr-2" />}
+            Process Single
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
+
+function BulkUploadVehicleForm() {
+  const bulkUploadMutation = useBulkUploadVehicles();
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
+    const files = Array.from(fileInput.files || []);
+    
+    if (files.length === 0) return;
+
+    bulkUploadMutation.mutate(files, {
+      onSuccess: () => {
+        (e.target as HTMLFormElement).reset();
+      }
+    });
+  }
+
+  return (
+    <Card className="bg-indigo-50/50 border-indigo-100 shadow-sm relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 -mr-12 -mt-12 rounded-full" />
+      <CardHeader>
+        <CardTitle className="text-sm font-bold text-indigo-700">Bulk Multi-Upload</CardTitle>
+        <CardDescription className="text-[11px] text-indigo-600/70">
+          Upload multiple assets. **Note: All files will be automatically categorized as <span className="font-bold underline">UNKNOWN</span> for later classification.**
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Multiple Assets</Label>
+            <Input
+              type="file"
+              name="files"
+              required
+              multiple
+              accept="image/*"
+              className="h-9 text-xs bg-white border-indigo-200 focus-visible:ring-indigo-500"
+            />
+          </div>
+          <div className="h-[54px] flex items-center bg-indigo-100/30 p-3 rounded-lg border border-indigo-100/50">
+             <p className="text-[10px] font-bold text-indigo-600 leading-tight">
+               <span className="opacity-70 mr-1">Triage Protocol:</span>
+               Current configuration will automatically route these items to the "Unknown" bucket for manual review.
+             </p>
+          </div>
+          <Button
+            type="submit"
+            disabled={bulkUploadMutation.isPending}
+            className="w-full h-9 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02]"
+          >
+            {bulkUploadMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Upload className="h-3 w-3 mr-2" />}
+            Execute Bulk Upload to UNKNOWN
           </Button>
         </form>
       </CardContent>
@@ -503,8 +563,9 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="bg-white/80 backdrop-blur-md border border-slate-200/60 p-8 rounded-[2rem] shadow-sm ring-1 ring-slate-100">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/40 backdrop-blur-md border border-slate-200/50 p-6 rounded-[2.5rem] shadow-sm">
           <UploadVehicleForm />
+          <BulkUploadVehicleForm />
         </section>
 
         <div className="space-y-6">
