@@ -7,9 +7,15 @@ const getEndpoint = () => {
   let endpoint = SERVER_CONFIG.S3_ENDPOINT;
   if (!endpoint) return undefined;
 
-  // Ensure protocol is present
+  // Determine if we should use SSL based on config or port 443
+  const useSsl = String(SERVER_CONFIG.S3_USE_SSL) === "true" || 
+                 SERVER_CONFIG.S3_PORT === 443;
+
+  // Ensure protocol is present and matches the SSL requirement
   if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
-    endpoint = `http://${endpoint}`;
+    endpoint = `${useSsl ? "https" : "http"}://${endpoint}`;
+  } else if (useSsl && endpoint.startsWith("http://")) {
+    endpoint = endpoint.replace("http://", "https://");
   }
 
   // If endpoint doesn't have a port and S3_PORT is provided, append it
@@ -46,6 +52,29 @@ export const getPresignedDownloadUrl = async (key: string) => {
   } catch (error) {
     console.error(error);
     return "";
+  }
+};
+
+export const getPresignedUploadUrl = async (originalFilename: string, contentType: string) => {
+  try {
+    const fileId = uuid();
+    const key = `${fileId}-${originalFilename.replace(/\s+/g, "_")}`;
+    const bucketName = SERVER_CONFIG.S3_BUCKET;
+
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      ContentType: contentType,
+    });
+
+    const url = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    });
+
+    return { url, key };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to generate upload URL");
   }
 };
 
