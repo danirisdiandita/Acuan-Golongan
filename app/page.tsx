@@ -59,6 +59,22 @@ const GOLONGAN_LABELS: Record<Golongan, string> = {
   UNKNOWN: "Unknown",
 };
 
+const GOLONGAN_DESCRIPTIONS: Record<Golongan, string> = {
+  GOL_I: "Sepeda",
+  GOL_II: "Sepeda motor kurang dari 500 cc dan gerobak dorong",
+  GOL_III: "Sepeda motor besar yang memiliki kapasitas lebih dari 500 cc dan kendaraan roda tiga",
+  GOL_IVA: "Kendaraan bermotor untuk penumpang berupa mobil jeep, sedan, minibus (Panjang sampai 5 m)",
+  GOL_IVB: "Mobil barang, mobil bak muatan terbuka/tertutup & double cabin (Panjang sampai 5 m)",
+  GOL_VA: "Kendaraan bermotor untuk penumpang berupa mobil bus (Panjang 5-7 m)",
+  GOL_VB: "Mobil barang truk/tangki ukuran sedang (Panjang 5-7 m)",
+  GOL_VIA: "Kendaraan bermotor untuk penumpang berupa mobil bus (Panjang 7-10 m)",
+  GOL_VIB: "Mobil barang truk/tangki (Panjang 7-10 m)",
+  GOL_VII: "Mobil barang tronton, mobil penarik berikut gandengan serta kendaraan alat berat (Panjang 10-12 m)",
+  GOL_VIII: "Mobil barang tronton, mobil tangki, kendaraan alat berat (Panjang 12-16 m)",
+  GOL_IX: "Mobil barang tronton, mobil tangki, kendaraan alat berat (Panjang lebih dari 16 m)",
+  UNKNOWN: "Kategori belum didefinisikan",
+};
+
 function VehicleGalleryModal({
   isOpen,
   onClose,
@@ -76,9 +92,20 @@ function VehicleGalleryModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] h-[95vh] overflow-hidden flex flex-col p-0 border border-slate-200 shadow-2xl rounded-[2.5rem] bg-slate-50/50 backdrop-blur-xl">
         <DialogHeader className="p-8 border-b bg-white/80 backdrop-blur-md">
-          <DialogTitle className="text-4xl font-extrabold tracking-tight text-slate-900">
-            {golonganTitle} <span className="text-slate-400 font-medium text-2xl ml-2">— Characteristics</span>
-          </DialogTitle>
+          <div className="space-y-1">
+            <DialogTitle className="text-4xl font-extrabold tracking-tight text-slate-900">
+              {golonganTitle} <span className="text-slate-400 font-medium text-2xl ml-2">— Characteristics</span>
+            </DialogTitle>
+            {/* Find the Golongan key from the title to show description */}
+            {Object.entries(GOLONGAN_LABELS).find(([_, label]) => label === golonganTitle)?.[0] && (
+              <div className="mt-2 inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100/50 px-4 py-2 rounded-xl">
+                <span className="h-1.5 w-1.5 rounded-full bg-indigo-600" />
+                <p className="text-indigo-900 font-bold text-base">
+                  {GOLONGAN_DESCRIPTIONS[Object.entries(GOLONGAN_LABELS).find(([_, label]) => label === golonganTitle)![0] as Golongan]}
+                </p>
+              </div>
+            )}
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-12 space-y-12 custom-scrollbar">
@@ -370,14 +397,19 @@ function DroppableContainer({
 
   return (
     <Card className="flex flex-col h-full bg-slate-50/30 border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 rounded-3xl group/container overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between py-4 px-6 space-y-0 bg-white/50 border-b border-slate-100/50">
-        <div className="flex items-center gap-3">
-          <div className="h-2.5 w-2.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.6)]" />
-          <CardTitle className="text-[11px] font-black text-slate-800 tracking-wider uppercase">{GOLONGAN_LABELS[golongan]}</CardTitle>
+      <CardHeader className="flex flex-col items-start py-4 px-6 space-y-2 bg-white/50 border-b border-slate-100/50">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-3">
+            <div className="h-2.5 w-2.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.6)]" />
+            <CardTitle className="text-[11px] font-black text-slate-800 tracking-wider uppercase">{GOLONGAN_LABELS[golongan]}</CardTitle>
+          </div>
+          <Badge variant="secondary" className="h-6 px-3 bg-indigo-50 text-indigo-700 font-bold text-[10px] border-indigo-100 shadow-sm rounded-full">
+            {items.length} Units
+          </Badge>
         </div>
-        <Badge variant="secondary" className="h-6 px-3 bg-indigo-50 text-indigo-700 font-bold text-[10px] border-indigo-100 shadow-sm rounded-full">
-          {items.length} Units
-        </Badge>
+        <p className="text-xs leading-relaxed text-slate-700 font-bold bg-slate-100/50 p-2 rounded-lg border border-slate-200/50">
+          {GOLONGAN_DESCRIPTIONS[golongan]}
+        </p>
       </CardHeader>
       <CardContent
         ref={setNodeRef}
@@ -509,11 +541,11 @@ export default function Home() {
     const activeId = active.id as string;
     const overId = over.id as string;
 
-    const activeVehicle = vehicles.find((v) => v.id === activeId);
+    const activeVehicle = vehicles.find((v: VehicleClass) => v.id === activeId);
     if (!activeVehicle) return;
 
     const overGolongan = GOLONGAN_ORDER.find(g => g === overId);
-    const overVehicle = vehicles.find((v) => v.id === overId);
+    const overVehicle = vehicles.find((v: VehicleClass) => v.id === overId);
     const targetGolongan = overGolongan || overVehicle?.class;
 
     if (targetGolongan && activeVehicle.class !== targetGolongan) {
@@ -542,7 +574,7 @@ export default function Home() {
     );
   }
 
-  const galleryItems = selectedGolongan ? vehicles.filter(v => v.class === selectedGolongan) : [];
+  const galleryItems = selectedGolongan ? vehicles.filter((v: VehicleClass) => v.class === selectedGolongan) : [];
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-indigo-100">
@@ -572,6 +604,24 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="h-10 px-4 rounded-xl border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100/50 text-indigo-700 font-bold text-xs flex items-center gap-2 transition-all shadow-sm">
+                  <Eye className="h-4 w-4" />
+                  View Guide
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[95vw] h-[95vh] p-0 overflow-hidden border-none bg-transparent shadow-none [&>button]:text-white [&>button]:h-10 [&>button]:w-10">
+                <div className="w-full h-full flex items-center justify-center bg-slate-900/90 backdrop-blur-xl rounded-[2.5rem] overflow-hidden p-4">
+                  <img 
+                    src="/image.png" 
+                    alt="Classification Reference Guide" 
+                    className="max-w-full max-h-full object-contain shadow-2xl rounded-xl"
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <div className="bg-white border p-1 rounded-full flex items-center gap-3 pr-4 shadow-sm">
               <div className="bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-tighter">
                 Connected
