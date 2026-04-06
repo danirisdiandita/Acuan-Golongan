@@ -46,8 +46,8 @@ export function useUploadVehicle() {
 
       if (!response.ok) throw new Error("Failed to upload to storage provider");
 
-      // 3. Inform server to finalize record in DB
-      return finalizeVehicleUpload(key, golongan);
+      // 3. Inform server to finalize record in DB with Discord notification if UNKNOWN
+      return finalizeVehicleUpload(key, golongan, true);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vehicles"] });
