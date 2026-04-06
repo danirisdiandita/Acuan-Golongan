@@ -5,6 +5,7 @@ import { Golongan } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { getPresignedDownloadUrl, uploadFileToS3, deleteFromS3, getPresignedUploadUrl } from "./s3";
+import { sendToDiscord } from "./discord";
 
 export async function getVehicles() {
   const vehicles = await prisma.vehicleClass.findMany();
@@ -32,13 +33,21 @@ export async function getUploadUrl(filename: string, fileType: string) {
   return await getPresignedUploadUrl(filename, fileType);
 }
 
-export async function finalizeVehicleUpload(key: string, golongan: Golongan) {
+export async function finalizeVehicleUpload(key: string, golongan: Golongan, shouldNotifyDiscord: boolean = false) {
   await prisma.vehicleClass.create({
     data: {
       imageKeyPath: key,
       class: golongan,
     },
   });
+
+  if (golongan === "UNKNOWN" && shouldNotifyDiscord) {
+    const imageUrl = await getPresignedDownloadUrl(key);
+    if (imageUrl) {
+      await sendToDiscord(imageUrl, "aku nggak tau golongan apa ini apakah ada yang bisa dibantu?");
+    }
+  }
+
   revalidatePath("/");
 }
 
