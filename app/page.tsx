@@ -612,12 +612,23 @@ export default function Home() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-[95vw] h-[95vh] p-0 overflow-hidden border-none bg-transparent shadow-none [&>button]:text-white [&>button]:h-10 [&>button]:w-10">
-                <div className="w-full h-full flex items-center justify-center bg-slate-900/90 backdrop-blur-xl rounded-[2.5rem] overflow-hidden p-4">
-                  <img 
-                    src="/image.png" 
-                    alt="Classification Reference Guide" 
-                    className="max-w-full max-h-full object-contain shadow-2xl rounded-xl"
-                  />
+                <div className="w-full h-full flex flex-col items-center gap-8 bg-slate-900/90 backdrop-blur-xl rounded-[2.5rem] overflow-y-auto p-12 custom-scrollbar">
+                  <div className="flex flex-col items-center gap-4">
+                    <p className="text-white/50 text-xs font-black uppercase tracking-[0.2em]">Primary Guide</p>
+                    <img 
+                      src="/image.png" 
+                      alt="Classification Reference Guide" 
+                      className="max-w-full h-auto object-contain shadow-2xl rounded-2xl border border-white/10"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center gap-4">
+                    <p className="text-white/50 text-xs font-black uppercase tracking-[0.2em]">Merak MB Reference</p>
+                    <img 
+                      src="/merak-mb.png" 
+                      alt="Merak MB Reference Guide" 
+                      className="max-w-full h-auto object-contain shadow-2xl rounded-2xl border border-white/10"
+                    />
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
